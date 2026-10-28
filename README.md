@@ -150,3 +150,4 @@ origen permitido en `SecurityConfig.java`.
   real (ver la nota sobre base de datos, arriba).
 - Agregar pruebas automatizadas (JUnit en backend, y de componentes en
   frontend), en coordinación con el rol de QA del equipo.
+
