@@ -1,0 +1,10 @@
+target/
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Base de datos H2 local (un archivo por integrante, no se comparte por git)
+data/
+*.mv.db
+*.trace.db
