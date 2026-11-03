@@ -1,51 +1,44 @@
 package com.ticketsystem.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * Entidad Ticket. Cubre HU-03 (creacion) y HU-04 (consulta) del Sprint 1.
- * Los campos de asignacion, comentarios y estados adicionales se ampliaran
- * en los siguientes Sprint (HU-06 a HU-11).
- */
-@Entity
-@Table(name = "tickets")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
+@Table(name = "tickets")
 public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_ticket")
     private Long id;
 
-    @Column(nullable = false, length = 150)
+    @Column(name = "titulo", nullable = false, length = 150)
     private String title;
 
-    @Column(nullable = false, length = 2000)
+    @Column(name = "descripcion", nullable = false)
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Convert(converter = TicketPriorityConverter.class)
+    @Column(name = "prioridad", nullable = false, length = 20)
     @Builder.Default
     private TicketPriority priority = TicketPriority.MEDIA;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Convert(converter = TicketStatusConverter.class)
+    @Column(name = "estado", nullable = false, length = 20)
     @Builder.Default
     private TicketStatus status = TicketStatus.ABIERTO;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "created_by_id", nullable = false)
+    @JoinColumn(name = "id_usuario_solicitante", nullable = false)
     private User createdBy;
 
-    @Column(nullable = false)
+    @Column(name = "fecha_creacion", nullable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -1,37 +1,36 @@
 package com.ticketsystem.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Entity
-@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
+@Table(name = "usuarios")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_usuario")
     private Long id;
 
-    @Column(nullable = false, length = 120)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String fullName;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(name = "correo", nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password_hash", nullable = false, length = 255)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Convert(converter = RoleConverter.class)
+    @Column(name = "id_rol", nullable = false)
     private Role role;
 
-    @Column(nullable = false)
+    // La tabla usuarios no tiene esta columna: no se guarda, siempre habilitado.
+    @Transient
     @Builder.Default
     private boolean enabled = true;
 }
