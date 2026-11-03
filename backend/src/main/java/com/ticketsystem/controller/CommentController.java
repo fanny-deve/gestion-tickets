@@ -28,6 +28,19 @@ public class CommentController {
                 c.getAuthor().getFullName(), c.getContent(), c.getCreatedAt());
     }
 
+    private User currentUser(Authentication auth) {
+        return userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    }
+
+    private void checkAccess(Ticket ticket, User user) {
+        if (user.getRole() == Role.USUARIO
+                && !ticket.getCreatedBy().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "No tienes permiso para ver o agregar comentarios en este ticket");
+        }
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CommentResponse create(@PathVariable Long ticketId,
@@ -38,18 +51,18 @@ public class CommentController {
         }
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket no encontrado"));
-        User author = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        User author = currentUser(auth);
+        checkAccess(ticket, author);
         Comment saved = commentRepository.save(Comment.builder()
                 .ticket(ticket).author(author).content(request.content().trim()).build());
         return toResponse(saved);
     }
 
     @GetMapping
-    public List<CommentResponse> list(@PathVariable Long ticketId) {
-        if (!ticketRepository.existsById(ticketId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket no encontrado");
-        }
+    public List<CommentResponse> list(@PathVariable Long ticketId, Authentication auth) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket no encontrado"));
+        checkAccess(ticket, currentUser(auth));
         return commentRepository.findByTicket_IdOrderByCreatedAtAsc(ticketId)
                 .stream().map(this::toResponse).toList();
     }
