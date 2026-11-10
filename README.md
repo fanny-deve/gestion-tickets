@@ -1,4 +1,34 @@
-# Sistema Web de Gestión de Tickets — Base inicial (Sprint 1)
+# TicketFlow — Sistema Web de Gestión de Tickets
+
+La rama `feat/demo-ticket-platform` contiene el modo demo principal: una aplicación React/Vite navegable sin Java, Spring Boot ni PostgreSQL. La persistencia de demostración usa `localStorage` con datos sintéticos, roles simulados y exportación/importación JSON.
+
+## Inicio rápido del modo demo
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Cuentas demo (contraseña `demo`):
+
+- `jorge.luis@demo.local` — administrador principal.
+- `lina@demo.local` y `luis.alexander@demo.local` — técnicos.
+- `cristian@demo.local`, `andrea@demo.local`, `liseth@demo.local` y `valeria@demo.local` — solicitantes.
+- También están disponibles las cuentas de Stefany, Claudia Marcela y Juan Camilo como administradores.
+
+Verificación:
+
+```bash
+npm test
+npx playwright install chromium   # una sola vez
+npm run test:e2e
+npm run build
+```
+
+La seguridad del modo demo es educativa y no reemplaza Spring Security. La documentación funcional y técnica está en `docs/`.
+
+## Estado histórico del backend
 
 Este repositorio contiene el punto de partida del sistema, cubriendo las
 cuatro historias de usuario planificadas para el Sprint 1:

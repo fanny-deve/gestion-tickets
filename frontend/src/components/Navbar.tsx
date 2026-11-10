@@ -1,23 +1,3 @@
-import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-
-export default function Navbar() {
-  const { user, logout } = useAuth();
-
-  if (!user) return null;
-
-  return (
-    <nav className="navbar">
-      <div className="navbar-brand">Gestión de Tickets</div>
-      <div className="navbar-links">
-        <Link to="/tickets">Tickets</Link>
-        <Link to="/tickets/nuevo">Nuevo ticket</Link>
-        {user.role === "ADMINISTRADOR" && <Link to="/usuarios">Usuarios</Link>}
-      </div>
-      <div className="navbar-user">
-        <span>{user.fullName} ({user.role})</span>
-        <button onClick={() => logout()}>Cerrar sesión</button>
-      </div>
-    </nav>
-  );
-}
+import { AnimatePresence, motion } from "motion/react"; import { NavLink, useNavigate } from "react-router-dom"; import { useAuth } from "../context/AuthContext"; import { useEffect, useState } from "react";
+const items=[{to:"/",icon:"⌂",label:"Resumen",end:true},{to:"/tickets",icon:"▤",label:"Tickets"},{to:"/tickets?new=1",icon:"＋",label:"Nuevo ticket"},{to:"/asignados",icon:"◉",label:"Mis asignados"},{to:"/configuracion",icon:"⚙",label:"Configuración"}];
+export default function Navbar(){const {user,logout}=useAuth();const nav=useNavigate();const [dark,setDark]=useState(()=>localStorage.getItem("ticketflow.theme")==="dark");const [collapsed,setCollapsed]=useState(()=>localStorage.getItem("ticketflow.sidebar")==="collapsed");useEffect(()=>{document.body.classList.toggle("dark",dark);localStorage.setItem("ticketflow.theme",dark?"dark":"light")},[dark]);useEffect(()=>{document.body.classList.toggle("sidebar-collapsed",collapsed);localStorage.setItem("ticketflow.sidebar",collapsed?"collapsed":"expanded")},[collapsed]);if(!user)return null;const visible=items.filter(i=>i.to!=="/asignados"||user.role!=="USUARIO");return <motion.aside className="sidebar" animate={{width:collapsed?76:244}} transition={{type:"spring",stiffness:280,damping:30}}><div className="brand"><img className="brand-logo" src="/logo-mark.svg" alt=""/><AnimatePresence>{!collapsed&&<motion.span initial={{opacity:0,x:-8}} animate={{opacity:1,x:0}}>TicketFlow</motion.span>}</AnimatePresence></div><button className="collapse-button" aria-label={collapsed?"Expandir navegación":"Contraer navegación"} onClick={()=>setCollapsed(!collapsed)}>{collapsed?"→":"←"}</button><div className="demo-pill">● <span>Modo demo</span></div><nav>{visible.map(i=><NavLink key={i.to} to={i.to} end={i.end} title={collapsed?i.label:undefined}><span className="nav-icon">{i.icon}</span>{!collapsed&&<span>{i.label}</span>}</NavLink>)}{user.role==="ADMINISTRADOR"&&<NavLink to="/usuarios" title={collapsed?"Usuarios":undefined}><span className="nav-icon">♙</span>{!collapsed&&<span>Usuarios</span>}</NavLink>}</nav><div className="sidebar-user"><div className="avatar">{user.fullName.split(" ").map(x=>x[0]).slice(0,2).join("")}</div>{!collapsed&&<div className="user-copy"><strong>{user.fullName}</strong><small>{user.role}</small></div>}<button className="icon-button" title="Cambiar tema" onClick={()=>setDark(!dark)}>{dark?"☼":"☾"}</button><button className="icon-button" title="Cerrar sesión" onClick={()=>{logout();nav("/login")}}>↪</button></div></motion.aside>}

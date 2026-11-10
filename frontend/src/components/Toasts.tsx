@@ -1,0 +1,5 @@
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
+type Toast = { id: number; message: string; tone?: "success" | "error" | "info" };
+export function notify(message: string, tone: Toast["tone"] = "success") { window.dispatchEvent(new CustomEvent("ticketflow:toast", { detail: { message, tone } })); }
+export default function Toasts(){const [items,setItems]=useState<Toast[]>([]);useEffect(()=>{const onToast=(e:Event)=>{const d=(e as CustomEvent<Omit<Toast,"id">>).detail;const item={...d,id:Date.now()+Math.random()};setItems(x=>[...x,item]);window.setTimeout(()=>setItems(x=>x.filter(t=>t.id!==item.id)),3600)};window.addEventListener("ticketflow:toast",onToast);return()=>window.removeEventListener("ticketflow:toast",onToast)},[]);return <div className="toast-stack" aria-live="polite"><AnimatePresence>{items.map(t=><motion.div key={t.id} className={`toast ${t.tone??"success"}`} initial={{opacity:0,x:28,scale:.96}} animate={{opacity:1,x:0,scale:1}} exit={{opacity:0,x:28,scale:.96}} transition={{duration:.22}}><span>{t.tone==="error"?"!":"✓"}</span>{t.message}</motion.div>)}</AnimatePresence></div>}

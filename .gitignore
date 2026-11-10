@@ -1,0 +1,7 @@
+node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+.playwright-mcp/
+frontend/test-results/
+frontend/playwright-report/
+backend/data/

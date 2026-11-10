@@ -1,29 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import PrivateRoute from "./components/PrivateRoute";
-import LoginPage from "./pages/LoginPage";
-import TicketsPage from "./pages/TicketsPage";
-import NewTicketPage from "./pages/NewTicketPage";
-import UsersPage from "./pages/UsersPage";
-
-export default function App() {
-  return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-
-        <Route element={<PrivateRoute />}>
-          <Route path="/tickets" element={<TicketsPage />} />
-          <Route path="/tickets/nuevo" element={<NewTicketPage />} />
-        </Route>
-
-        <Route element={<PrivateRoute allowedRoles={["ADMINISTRADOR"]} />}>
-          <Route path="/usuarios" element={<UsersPage />} />
-        </Route>
-
-        <Route path="*" element={<Navigate to="/tickets" replace />} />
-      </Routes>
-    </>
-  );
-}
+import {Navigate,Route,Routes} from "react-router-dom"; import Navbar from "./components/Navbar"; import Toasts from "./components/Toasts"; import PrivateRoute from "./components/PrivateRoute"; import LoginPage from "./pages/LoginPage"; import TicketsPage from "./pages/TicketsPage"; import TicketDetailPage from "./pages/TicketDetailPage"; import UsersPage from "./pages/UsersPage"; import ConfigPage from "./pages/ConfigPage"; import {useAuth} from "./context/AuthContext"; import {repository} from "./services/repository"; import {useEffect,useState} from "react";
+function useStorageSync(){const [,setVersion]=useState(0);useEffect(()=>{const refresh=()=>setVersion(v=>v+1);window.addEventListener("storage",refresh);return()=>window.removeEventListener("storage",refresh)},[])}
+function Dashboard(){const {user}=useAuth();const d=repository.data();const visible=user?.role==="ADMINISTRADOR"?d.tickets:d.tickets.filter(t=>t.requesterId===user?.id||t.assigneeId===user?.id);const count=(s:string)=>visible.filter(t=>t.status===s).length;return <main className="content"><header className="page-header"><div><p className="eyebrow">ESPACIO DE TRABAJO</p><h1>Resumen general</h1><p className="muted">Aquí tienes una vista rápida de la operación de soporte.</p></div><a className="button primary" href="/tickets/nuevo">＋ Crear ticket</a></header><section className="kpi-grid"><div className="kpi"><span>Total de tickets</span><strong>{visible.length}</strong><small>↗ Actualizado ahora</small></div><div className="kpi"><span>Abiertos</span><strong>{count("ABIERTO")}</strong><small className="warning">Requieren atención</small></div><div className="kpi"><span>En proceso</span><strong>{count("EN_PROCESO")}</strong><small>En seguimiento</small></div><div className="kpi"><span>Resueltos</span><strong>{count("RESUELTO")+count("CERRADO")}</strong><small className="success">✓ Casos atendidos</small></div></section><section className="dashboard-grid"><div className="panel"><div className="panel-title"><h2>Actividad reciente</h2><a href="/tickets">Ver todos →</a></div>{visible.slice(0,5).map(t=><div className="activity" key={t.id}><span className={`status-dot ${t.status.toLowerCase()}`}/><div><strong>{t.title}</strong><small>#{t.id} · {t.category}</small></div><span className={`badge ${t.priority.toLowerCase()}`}>{t.priority}</span></div>)}</div><div className="panel"><div className="panel-title"><h2>Distribución</h2></div>{["ABIERTO","EN_PROCESO","RESUELTO","CERRADO"].map(s=><div className="bar-row" key={s}><span>{s.replace("_"," ")}</span><div className="bar"><i style={{width:`${visible.length?count(s)/visible.length*100:0}%`}}/></div><b>{count(s)}</b></div>)}</div></section></main>}
+function Config(){const [msg,setMsg]=useState("");const download=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([repository.export()],{type:"application/json"}));a.download="ticketflow-demo.json";a.click();};return <main className="content"><header className="page-header"><div><p className="eyebrow">SISTEMA</p><h1>Configuración demo</h1><p className="muted">Herramientas para preparar tu demostración.</p></div></header><div className="panel settings"><h2>Datos de demostración</h2><p>La información se guarda en localStorage del navegador y sobrevive a una recarga.</p><div className="settings-actions"><button className="button" onClick={download}>↓ Exportar JSON</button><button className="button danger" onClick={()=>{if(confirm("¿Restaurar los datos iniciales?")){repository.reset();setMsg("Datos restaurados. Recarga la página para verlos.");}}}>Restaurar datos iniciales</button></div>{msg&&<p className="success-text">{msg}</p>}<hr/><p className="muted">El modo demo simula roles en el cliente. No reemplaza la autenticación y autorización de Spring Security en producción.</p></div></main>}
+export default function App(){useStorageSync();return <><Navbar/><Toasts/><Routes><Route path="/login" element={<LoginPage/>}/><Route element={<PrivateRoute/>}><Route path="/" element={<Dashboard/>}/><Route path="/tickets" element={<TicketsPage/>}/><Route path="/tickets/nuevo" element={<Navigate to="/tickets?new=1" replace/>}/><Route path="/tickets/:id" element={<TicketDetailPage/>}/><Route path="/asignados" element={<TicketsPage assigned/>}/><Route path="/configuracion" element={<ConfigPage/>}/></Route><Route element={<PrivateRoute allowedRoles={["ADMINISTRADOR"]}/>}><Route path="/usuarios" element={<UsersPage/>}/></Route><Route path="*" element={<Navigate to="/" replace/>}/></Routes></>}
