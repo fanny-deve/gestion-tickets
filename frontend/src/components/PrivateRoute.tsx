@@ -17,7 +17,7 @@ export default function PrivateRoute({ allowedRoles }: Props) {
   // Mientras se confirma si hay sesion activa (GET /auth/me), no se decide
   // nada todavia: evita un redireccionamiento a /login en falso al refrescar.
   if (loading) {
-    return <p style={{ padding: 24 }}>Cargando...</p>;
+    return <div className="loading-screen">Cargando espacio de trabajo…</div>;
   }
 
   if (!user) {
@@ -25,7 +25,7 @@ export default function PrivateRoute({ allowedRoles }: Props) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/tickets" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;
